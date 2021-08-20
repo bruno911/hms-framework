@@ -1,0 +1,177 @@
+{% extends 'base_logged.html' %}
+
+{% block content %}
+
+<h2>New Booking</h2>
+
+{% if form.non_field_errors %}
+<ul>
+  {% for error in form.non_field_errors %}
+    <li>{{ error }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+
+<form action="{% url 'new_booking_route' %}" method="post">
+    {% csrf_token %}
+    <table class="table">
+      <tr>
+        <th>{{ form.customer.label_tag }}</th>
+        <td>
+          {{ form.customer }}
+            or <a data-toggle="modal" data-target="#exampleModal">Create New Customer</a>
+        </td>
+      </tr>
+      <tr>
+        <th>{{ form.room.label_tag }}</th>
+        <td>
+          {{ form.room }} or <a href="{% url 'search_availability' %}">Check Availability</a>
+        </td>
+      </tr>
+      <tr>
+        <th>Dates:</th>
+        <td>
+            <input type="date" name="date_from" class="form-control"
+                   style="max-width: 120px; padding: 0; display: inline-block;" value="{{ date_from }}" />
+            to
+            <input type="date" name="date_to" class="form-control"
+                   style="max-width: 120px; padding: 0; display: inline-block;" value="{{ date_to }}"  />
+        </td>
+      </tr>
+    </table>
+    <input type="submit" value="Create" class="btn btn-primary btn-lg pull-right" />
+</form>
+<div class="cleafix"></div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Customer</h5>
+      </div>
+      <div class="modal-body">
+          <h3>
+              Personal Details:
+          </h3>
+
+            <table class="table">
+                <tr>
+                    <td>First Name:</td>
+                    <td>
+                        <input type="text" id="first_name" class="form-control" />
+                    </td>
+                    <td>Last Name:</td>
+                    <td>
+                        <input type="text" id="last_name" class="form-control" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Telephone:</td>
+                    <td>
+                        <input type="text" id="telephone" class="form-control" />
+                    </td>
+                    <td>Email:</td>
+                    <td>
+                        <input type="email" id="email" class="form-control" />
+                    </td>
+                </tr>
+            </table>
+
+          <h3>
+              Address
+          </h3>
+
+          <table class="table">
+            <tr>
+                <td>House Number:</td>
+                <td>
+                    <input type="text" id="house_number" class="form-control" />
+                </td>
+                <td>Street:</td>
+                <td>
+                    <input type="text" id="street" class="form-control" />
+                </td>
+                <td>Post Code:</td>
+                <td>
+                    <input type="text" id="postal_code" class="form-control" />
+                </td>
+            </tr>
+            <tr>
+                <td>Country:</td>
+                <td>
+                    <select id="country" class="form-control">
+                      {%  for country in countries %}
+                        <option value="{{  country.id }}">{{ country }}</option>
+                      {% endfor %}
+                    </select>
+                </td>
+                <td>City:</td>
+                <td>
+                    <select id="city" class="form-control">
+                      {%  for city in cities %}
+                        <option value="{{  city.id }}">{{ city }}</option>
+                      {% endfor %}
+                    </select>
+                </td>
+            </tr>
+          </table>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="create-customer">Create!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script>
+    $(document).ready(function (){
+        $('#create-customer').click(function (){
+           let firstName = $('#first_name').val(),
+               lastName = $('#last_name').val(),
+               telephone = $('#telephone').val(),
+               email = $('#email').val(),
+               houseNumber = $('#house_number').val(),
+               street = $('#street').val(),
+               postalCode = $('#postal_code').val(),
+               city = $('#city').val(),
+               country = $('#country').val(),
+               csrfToken = "{{ csrf_token }}";
+
+           $.ajax({
+                method: "POST",
+                url: '{% url 'save_customer_json' %}',
+                data: {
+                    firstName: firstName,
+                    lastName: lastName,
+                    telephone: telephone,
+                    email: email,
+                    houseNumber: houseNumber,
+                    street: street,
+                    postalCode: postalCode,
+                    city: city,
+                    country: country,
+                    csrfmiddlewaretoken: csrfToken
+                }
+           }).done(function (data){
+               $('#id_customer').append('' +
+                   '<option value="'+data.customerValue+'" selected="selected">' +
+                   data.customerLabel +
+                   '</option>');
+               $('#exampleModal').modal('hide');
+           }).fail(function (e){
+               alert('An error occurred');
+           })
+        });
+    });
+</script>
+{% endblock %}

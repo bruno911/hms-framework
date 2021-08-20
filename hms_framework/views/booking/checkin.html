@@ -1,0 +1,88 @@
+{% extends 'base_logged.html' %}
+
+{% block content %}
+<h2>Checkin</h2>
+
+    <h3>List of bookings arriving today.</h3>
+    <br />
+    <table class="table table-hovered">
+        <thead>
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    Customer
+                </th>
+                <th>
+                    From
+                </th>
+                <th>
+                    To
+                </th>
+                <th>
+                    Room
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>
+                    <button class="check-in btn btn-sm btn-success" data-booking-id="{{ booking.id }}">Check-in</button>
+                </td>
+                <td>{{ booking.customer }}</td>
+                <td>{{ booking.date_from }}</td>
+                <td>{{ booking.date_to }}</td>
+                <td>{{ booking.room.room_type.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Check-in</h5>
+      </div>
+      <div class="modal-body">
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+$(document).ready(function (){
+    $('.check-in').click(function (){
+            let bookingId = $(this).data('booking-id'),
+                csrfToken = "{{ csrf_token }}";
+
+            loadCheckinDialog(bookingId, csrfToken);
+        });
+});
+
+function loadCheckinDialog(bookingId, csrfToken){
+    $.ajax({
+        method: "POST",
+        url: '{% url 'booking_checkin_open_dialog' %}',
+        data: {
+            bookingId: bookingId,
+            csrfmiddlewaretoken: csrfToken
+        }
+   }).done(function (html){
+       $('#exampleModal .modal-body').html(html);
+       $('#exampleModal').modal('show');
+   }).fail(function (e){
+       alert('An error occurred');
+   })
+}
+</script>
+{% endblock %}

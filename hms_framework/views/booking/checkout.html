@@ -1,0 +1,41 @@
+{% extends 'base_logged.html' %}
+
+{% block content %}
+<h2>Checkout</h2>
+
+    <h3>List of bookings leaving today.</h3>
+    <br />
+    <table class="table table-hovered">
+        <thead>
+            <tr>
+                <th>
+
+                </th>
+                <th>
+                    Customer
+                </th>
+                <th>
+                    Checkin
+                </th>
+                <th>
+                    CheckOut
+                </th>
+                <th>
+                    Room
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td></td>
+                <td>{{ booking.customer.name }}</td>
+                <td>{{ booking.date_from }}</td>
+                <td>{{ booking.date_to }}</td>
+                <td>{{ booking.room.room_type.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

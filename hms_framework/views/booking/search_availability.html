@@ -1,0 +1,109 @@
+{% extends 'base_logged.html' %}
+
+{% block content %}
+
+<h2>
+    Search Availability
+</h2>
+
+<h3>
+  Provide the following information in order to check availability.
+</h3>
+
+<br />
+<br />
+{% if warning_message and warning_message == 'NO_ROOM_FOUND' %}
+    <div class="alert alert-info" role="alert">
+        <a href="#" class="alert-link">No rooms available for the combination required. Try a different combination.</a>
+    </div>
+{% endif %}
+
+<form action="{% url 'search_availability' %}" method="post">
+    {% csrf_token %}
+    <table class="table">
+      <tr>
+        <th>Room Type</th>
+        <td>
+          <select name="room_type" class="form-control">
+              {%  for room_type in room_types %}
+                  {% if selected_room_type == room_type.id %}
+                    <option value="{{ room_type.id }}" selected="selected">{{ room_type.name }}</option>
+                  {% else %}
+                    <option value="{{ room_type.id }}">{{ room_type.name }}</option>
+                  {% endif %}
+              {% endfor %}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>Number of Guests</th>
+        <td>
+          <input type="number"
+                 name="number_of_guests" step="1" min="1" max="8"
+                 class="form-control"
+                 value="{{ number_of_guests }}"
+          />
+        </td>
+      </tr>
+      <tr>
+        <th>Dates: </th>
+        <td>
+            <input type="date" name="date_from" class="form-control"
+                   style="max-width: 120px; padding: 0; display: inline-block;" value="{{ date_from }}" />
+            to
+            <input type="date" name="date_to" class="form-control"
+                   style="max-width: 120px; padding: 0; display: inline-block;" value="{{ date_to }}"  />
+        </td>
+      </tr>
+    </table>
+    <input class="btn btn-primary btn-lg pull-right" type="submit" value="Check!" />
+</form>
+    <div class="clearfix"></div>
+    {% if rooms %}
+        Results:
+
+        <div class="row">
+            {% for room in rooms %}
+            <div class="col-sm-6 col-md-4">
+                <div class="thumbnail">
+                    <img src="/{{ room.room_type.pictures.first.image }}" alt="Image">
+                      <div class="caption">
+                        <h3>{{ room.room_type.name }} <small>{{ room.square_meters }} sqm</small></h3>
+                          <p>
+                              Floor: {{ room.floor }} |
+                              Room: {{ room.room_number }} |
+                              Bed(s): {{  room.room_beds.count }} -
+                              {% for room_bed in room.room_beds.all %}
+                                {{ room_bed.name }}
+                              {% endfor %}
+                          </p>
+                          <p>
+                              {{ room.description }}
+                          </p>
+                          <p>
+                            <ul>
+                              {% for room_feature in room.room_features.all %}
+                                  <li>
+                                    {{ room_feature.name }}
+                                  </li>
+                              {% endfor %}
+                            </ul>
+                          </p>
+                          <p>
+                              <h4>Price:</h4>
+                              Night: {{ room.price_night }}€ <br />
+                              Week: {{ room.price_week }}€ <br />
+                              Month: {{ room.price_month }}€ <br />
+                          </p>
+                        <p class="align-right">
+                            <a href="{% url 'new_booking_route_room' room.id date_from date_to %}" class="btn btn-primary align-right pull-right" role="button">Book Room</a>
+                        </p>
+                          <div class="clearfix"></div>
+                      </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+{% endblock %}

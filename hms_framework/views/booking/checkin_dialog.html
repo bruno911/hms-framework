@@ -1,0 +1,130 @@
+<h3>
+  Personal Details:
+</h3>
+
+<table class="table">
+    <tr>
+        <td>First Name:</td>
+        <td>
+            {{ booking.customer.first_name }}
+        </td>
+        <td>Last Name:</td>
+        <td>
+            {{ booking.customer.last_name }}
+        </td>
+    </tr>
+    <tr>
+        <td>Telephone:</td>
+        <td>
+            {{ booking.customer.telephone }}
+        </td>
+        <td>Email:</td>
+        <td>
+            {{ booking.customer.email }}
+        </td>
+    </tr>
+</table>
+
+<h3>
+  Address
+</h3>
+
+<table class="table">
+<tr>
+    <td>House Number:</td>
+    <td>
+        {{ booking.customer.address.house_number }}
+    </td>
+    <td>Street:</td>
+    <td>
+        {{ booking.customer.address.street }}
+    </td>
+    <td>Post Code:</td>
+    <td>
+        {{ booking.customer.address.postal_code }}
+    </td>
+</tr>
+<tr>
+    <td>Country:</td>
+    <td>
+        {{ booking.customer.address.country.name }}
+    </td>
+    <td>City:</td>
+    <td>
+        {{ booking.customer.address.city.name }}
+    </td>
+</tr>
+</table>
+
+<h3>
+  Invoice
+</h3>
+
+<table class="table">
+<tr>
+    <td><strong>Invoice Number:</strong></td>
+    <td>
+        {{ invoice.id }}
+    </td>
+    <td><strong>Due Date:</strong></td>
+    <td>
+        {{ invoice.due_date }}
+    </td>
+    <td><strong>Created By:</strong></td>
+    <td>
+        {{ invoice.created_by.username }}
+    </td>
+</tr>
+<tr>
+    <td colspan="4"><strong>Description</strong></td>
+    <td><strong>Discount</strong></td>
+    <td><strong>Amount</strong></td>
+</tr>
+    {% for invoice_item in invoice_items %}
+<tr>
+    <td colspan="4">{{ invoice_item.description }}</td>
+    <td>{{ invoice_item.discount }}</td>
+    <td>{{ invoice_item.amount }} €</td>
+</tr>
+    {% endfor %}
+</table>
+
+<h3>Payment</h3>
+{% if invoice_payments %}
+    {% for invoice_payment in invoice_payments %}
+        Paid: {{ invoice_payment.amount }}€ ({{ invoice_payment.payment_type }})  On: {{ invoice_payment.created_datetime }} By: {{ invoice.created_by.username }}
+    {% endfor %}
+
+{% else %}
+<button class="btn btn-primary btn-sm" id="pay-by-card">Pay by Card</button>
+<button class="btn btn-primary btn-sm" id="pay-by-cash">Pay by Cash</button>
+    <script>
+    $('#pay-by-card').click(function (){
+        payBy('CARD', '{{ invoice.id }}');
+    });
+
+    $('#pay-by-cash').click(function (){
+        payBy('CASH', '{{ invoice.id }}');
+    });
+
+    function payBy(type, invoiceId){
+           let csrfToken = "{{ csrf_token }}",
+                bookingId = "{{ booking.id }}";
+
+           $.ajax({
+                method: "POST",
+                url: '{% url 'booking_checkin_mark_payment' %}',
+                data: {
+                    type: type,
+                    invoiceId: invoiceId,
+                    csrfmiddlewaretoken: csrfToken
+                }
+           }).done(function (html){
+               loadCheckinDialog(bookingId, csrfToken);
+           }).fail(function (e){
+               alert('An error occurred');
+           })
+    }
+</script>
+{% endif %}
+
