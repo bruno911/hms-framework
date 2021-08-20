@@ -33,8 +33,8 @@ urlpatterns = [
     url(r'^search_availability', views.search_availability, name='search_availability'),
     url(r'^report/occupancy_report', views.occupancy_report, name='occupancy_report'),
     url(r'^api/customer/create', views.save_customer_json, name='save_customer_json'),
-    url(r'^logout', auth_views.logout, name='logout'),
-    url('accounts/login/', auth_views.login, name='login'),
+    url(r'^logout', auth_views.LogoutView, name='logout'),
+    url('accounts/login/', auth_views.LoginView, name='login'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

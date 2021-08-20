@@ -4,7 +4,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 
 from .factory import BookingFactory, CustomerFactory
 from .forms import BookingForm
@@ -24,7 +24,7 @@ def login_user(request):
                 login(request, user)
                 return HttpResponseRedirect('birthdayreminder.views.main')
 
-    return render_to_response('login.html', {'username': ''})
+    return render(None, 'login.html', {'username': ''})
 
 
 @login_required
