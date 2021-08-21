@@ -2,7 +2,7 @@ from hms_framework.interfaces.auth.authentication_service import AuthenticationS
 from django.contrib.auth import authenticate
 
 
-class DjangoAuthenticationAdapter(AuthenticationService):
+class DjangoAuthenticationProxy(AuthenticationService):
 
     def is_a_valid_user(self, username, password) -> bool:
         user = authenticate(username=username, password=password)

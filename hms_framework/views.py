@@ -17,7 +17,7 @@ def login_user(request):
     if request.POST:
         username = request.POST.get('username')
         password = request.POST.get('password')
-        authentication_service = AuthFactory.create_service()
+        authentication_service = AuthFactory().create_service()
         is_a_valid_user = authentication_service.is_a_valid_user(username=username, password=password)
         if not is_a_valid_user:
             raise Exception('Invalid user please try again.')
