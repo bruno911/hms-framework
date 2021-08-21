@@ -4,6 +4,7 @@ from hms_framework.models import Customer, Booking, Room
 from hms_framework.services.auth.proxy.django_authentication_proxy import DjangoAuthenticationProxy
 from hms_framework.services.auth.authenticator import Authenticator
 from hms_framework.services.booking.make_booking import MakeBooking
+from hms_framework.services.booking.search_availability import SearchAvailability
 
 
 class CustomerFactory(ModelFactory):
@@ -23,6 +24,12 @@ class BookingFactory(ModelFactory):
             booking_model=booking_model,
             room_model=room_model,
             customer_model=customer_model
+        )
+        return service
+
+    def search_availability_service(self):
+        service = SearchAvailability(
+            room_model=RoomFactory().create_model()
         )
         return service
 
