@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 
-from .factory import BookingFactory, CustomerFactory
+from .factory import BookingFactory, CustomerFactory, AuthFactory
 from .forms import BookingForm
 from .models import RoomType, Room, Country, City, Address, Customer, Booking, Invoice, InvoiceItem, InvoicePayment
 from .services.booking.search_availability import SearchAvailability
@@ -17,12 +17,10 @@ def login_user(request):
     if request.POST:
         username = request.POST.get('username')
         password = request.POST.get('password')
-
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return HttpResponseRedirect('birthdayreminder.views.main')
+        authentication_service = AuthFactory.create_service()
+        is_a_valid_user = authentication_service.is_a_valid_user(username=username, password=password)
+        if not is_a_valid_user:
+            raise Exception('Invalid user please try again.')
 
     return render(None, 'login.html', {'username': ''})
 

@@ -1,5 +1,9 @@
+from hms_framework.interfaces.auth.authentication_service import AuthenticationService
 from hms_framework.interfaces.patterns.model_factory import ModelFactory
+from hms_framework.interfaces.patterns.service_factory import ServiceFactory
 from hms_framework.models import Customer, Booking, Room
+from hms_framework.services.auth.adapters.django_authentication_adapter import DjangoAuthenticationAdapter
+from hms_framework.services.auth.authenticator import Authenticator
 
 
 class CustomerFactory(ModelFactory):
@@ -9,10 +13,16 @@ class CustomerFactory(ModelFactory):
 
 class BookingFactory(ModelFactory):
     def create_model(self):
-
         return Booking
 
 
 class RoomFactory(ModelFactory):
     def create_model(self):
         return Room
+
+
+class AuthFactory(ServiceFactory):
+    def create_service(self) -> Authenticator:
+        authentication_service = DjangoAuthenticationAdapter()
+        service = Authenticator(authentication_service=authentication_service)
+        return service
