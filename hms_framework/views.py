@@ -27,7 +27,7 @@ def login_user(request):
 
 @login_required
 def index(request):
-    return render(request, 'dashboard/index.html', {})\
+    return render(request, 'dashboard/index.html', {})
 
 
 @login_required
@@ -80,12 +80,13 @@ def search_availability(request):
         date_from = request.POST.get("date_from", "")
         date_to = request.POST.get("date_to", "")
 
-        rooms = SearchAvailability(
+        search_availability_service = BookingFactory().search_availability_service()
+        rooms = search_availability_service.execute(
             room_type=room_type,
             number_of_guests=number_of_guests,
             date_from=date_from,
-            date_to=date_to,
-        ).execute()
+            date_to=date_to
+        )
 
         if rooms is None:
             return render(request, 'booking/search_availability.html', {
