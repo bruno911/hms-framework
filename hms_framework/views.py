@@ -38,14 +38,14 @@ def logout_view(request):
 @login_required
 def new_booking(request, room_id=None, date_from=None, date_to=None):
     if request.method == "POST":
-        model = BookingFactory().create_model()
-        booking = model()
-        booking.room = Room.objects.get(pk=request.POST.get('room'))
-        booking.customer = Customer.objects.get(pk=request.POST.get('customer'))
-        booking.date_from = request.POST.get('date_from')
-        booking.date_to = request.POST.get('date_to')
-        booking.created_by_id = request.user.id
-        booking.save()
+        make_booking = BookingFactory().make_booking_service()
+        make_booking.execute(
+            room_id=request.POST.get('room'),
+            customer_id=request.POST.get('customer'),
+            date_from=request.POST.get('date_from'),
+            date_to=request.POST.get('date_to'),
+            created_by_user_id=request.user.id
+        )
 
         return render(request, 'dashboard/index.html')
 
