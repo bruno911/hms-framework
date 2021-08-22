@@ -10,6 +10,7 @@ from hms_framework.services.booking.create_customer import CreateCustomer
 from hms_framework.services.booking.make_booking import MakeBooking
 from hms_framework.services.booking.search_availability import SearchAvailability
 from hms_framework.services.financial.build_invoice import BuildInvoice
+from hms_framework.services.financial.debt_collector import DebtCollector
 from hms_framework.services.financial.mark_payment import MarkPayment
 
 
@@ -121,6 +122,12 @@ class InvoicePaymentFactory(ModelFactory):
             user_model=user_model,
             invoice_payment_model=invoice_payment_model
         )
+        return service
+
+
+class FinancialFactory:
+    def debt_collector_service(self, customer):
+        service = DebtCollector(customer=customer)
         return service
 
 

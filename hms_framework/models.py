@@ -214,6 +214,8 @@ class Customer(models.Model):
     telephone = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
     address = models.ForeignKey('Address', on_delete=models.PROTECT)
+    has_debts = models.BooleanField(default=False)
+    last_has_debts_notified_datetime = models.DateTimeField(auto_now_add=False, blank=True, null=True)
 
     created_by = models.ForeignKey(
         User,
