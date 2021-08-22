@@ -8,6 +8,7 @@ from hms_framework.services.auth.authenticator import Authenticator
 from hms_framework.services.booking.make_booking import MakeBooking
 from hms_framework.services.booking.search_availability import SearchAvailability
 from hms_framework.services.financial.build_invoice import BuildInvoice
+from hms_framework.services.financial.mark_payment import MarkPayment
 
 
 class CustomerFactory(ModelFactory):
@@ -78,6 +79,17 @@ class InvoiceItemFactory(ModelFactory):
 class InvoicePaymentFactory(ModelFactory):
     def create_model(self):
         return InvoicePayment
+
+    def mark_payment_service(self):
+        invoice_model = self.create_model()
+        user_model = UserFactory().create_model()
+        invoice_payment_model = InvoicePaymentFactory().create_model()
+        service = MarkPayment(
+            invoice_model=invoice_model,
+            user_model=user_model,
+            invoice_payment_model=invoice_payment_model
+        )
+        return service
 
 
 class UserFactory(ModelFactory):
