@@ -6,7 +6,8 @@ from django.test import TestCase
 
 # Create your tests here.
 from hms_framework.factory import CustomerFactory, BookingFactory, RoomFactory
-from hms_framework.models import Customer, Address, Country, City, Invoice, InvoiceItem, Room, Booking
+from hms_framework.models import Customer, Address, Country, City, Invoice, InvoiceItem, Room, Booking, CustomerMemento
+from hms_framework.value_object.booking.create_customer_request import CreateCustomerRequest
 
 
 class TestModels(TestCase):
@@ -156,3 +157,42 @@ class TestFactory(TestCase):
     def test_room_factory(self):
         model = RoomFactory().create_model()
         assert type(model) == type(Room)
+
+
+class TestCustomerMemento:
+
+    @pytest.mark.django_db(transaction=True)
+    def test_modifying_field_saves_and_undo_properly(self, city, user):
+        create_customer_request = CreateCustomerRequest(
+            customer_first_name='Test 1',
+            customer_last_name='Test 2',
+            customer_telephone='123456789',
+            customer_email='bruno.quintana@gmail.com',
+            address_house_number='27',
+            address_street='my street',
+            address_postal_code='dublin 1',
+            address_city_id=city.id,
+            address_country_id=city.country.id,
+            created_by_user_id=user.id
+        )
+        create_customer_service = CustomerFactory().create_customer_service()
+        create_customer_response = create_customer_service.execute(
+            create_customer_request=create_customer_request
+        )
+
+        customer_model = CustomerFactory().create_model()
+        customer_id = create_customer_response.customer.id
+        customer = customer_model.objects.get(pk=customer_id)
+        customer.first_name = 'Test modified first name'
+        customer.save()
+
+        customer_model.objects.get(pk=customer.pk)
+        # Make sure new name saved properly
+        assert customer.first_name == 'Test modified first name'
+
+        customer_memento = CustomerMemento.objects.all().first()
+        customer.undo(customer_memento=customer_memento)
+
+        customer = customer_model.objects.get(pk=customer.pk)
+        # First name should be rolled back to initial value
+        assert customer.first_name == 'Test 1'

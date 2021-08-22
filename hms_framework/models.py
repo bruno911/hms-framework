@@ -10,6 +10,7 @@ from django.db import models
 # Capabilities:
 # getListOfAvailableRooms()
 from django_resized import ResizedImageField
+from django.forms import model_to_dict
 
 
 class Hotel(models.Model):
@@ -103,7 +104,7 @@ class Country(models.Model):
 # price_night: float
 # price_week: float
 # price_month: float
-# type: external/internal
+# type externalinternal
 # description: string,
 # room_number: int
 # floor: int
@@ -204,6 +205,13 @@ class RoomPricePeriod(models.Model):
     created_datetime = models.DateTimeField(auto_now_add=True)
 
 
+class CustomerMemento(models.Model):
+    customer = models.ForeignKey('Customer', on_delete=models.PROTECT)
+    field_name = models.CharField(max_length=255)
+    field_value = models.CharField(max_length=255)
+    memento_datetime = models.DateTimeField(auto_now_add=True)
+
+
 class Customer(models.Model):
 
     def __str__(self):
@@ -222,6 +230,54 @@ class Customer(models.Model):
         on_delete=models.CASCADE,
     )
     created_datetime = models.DateTimeField(auto_now_add=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__initial = self._dict
+
+    @property
+    def diff(self):
+        d1 = self.__initial
+        d2 = self._dict
+        diffs = [(k, (v, d2[k])) for k, v in d1.items() if v != d2[k]]
+        return dict(diffs)
+
+    @property
+    def has_changed(self):
+        return bool(self.diff)
+
+    @property
+    def changed_fields(self):
+        return self.diff.keys()
+
+    @property
+    def _dict(self):
+        _dict = model_to_dict(self, fields=[field.name for field in
+                              self._meta.fields])
+        return _dict
+
+    def save_memento(self):
+        if self.has_changed:
+            for field_name in self.changed_fields:
+                # Id will change on creation only, so we ignore this.
+                if field_name == 'id':
+                    continue
+                customer_memento = CustomerMemento()
+                customer_memento.customer = self
+                customer_memento.field_name = field_name
+                customer_memento.field_value = self._dict[field_name]
+                customer_memento.save()
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        self.save_memento()
+        self.__initial = self._dict
+
+    def undo(self, customer_memento: CustomerMemento):
+        if self.id != customer_memento.customer.id:
+            raise Exception('Customer memento does not match current customer')
+        setattr(self, customer_memento.field_name, customer_memento.field_value)
+        super().save()
 
 
 class Invoice(models.Model):
