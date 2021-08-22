@@ -1,15 +1,13 @@
-import datetime
-
-from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 
-from .factory import BookingFactory, CustomerFactory, AuthFactory
+from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory
 from .forms import BookingForm
-from .models import RoomType, Room, Country, City, Address, Customer, Booking, Invoice, InvoiceItem, InvoicePayment
-from .services.booking.search_availability import SearchAvailability
+from .models import RoomType, Room, Country, City, Address, Invoice, InvoicePayment
+from .value_object.financial.build_invoice_request import BuildInvoiceRequest
 
 
 def login_user(request):
@@ -118,41 +116,18 @@ def checkin_open_dialog(request):
     if request.method != "POST":
         raise Exception('Request method is not supported.')
 
-    booking_model = BookingFactory().create_model()
-    booking = booking_model.objects.get(pk=request.POST.get('bookingId'))
-
-    try:
-        invoice = Invoice.objects.get(customer_id=booking.customer.id)
-        invoice_items = InvoiceItem.objects.filter(invoice=invoice.id)
-    except Invoice.DoesNotExist:
-
-        invoice = Invoice()
-        invoice.customer = booking.customer
-        invoice.due_date = datetime.datetime.now()
-        invoice.is_deleted = False
-        invoice.created_by = User.objects.get(pk=request.user.id)
-        invoice.save()
-
-        invoice_item = InvoiceItem()
-        invoice_item.amount = booking.total_amount
-        invoice_item.description = str(booking.room) + ' (' + booking.date_from.strftime('%d/%m/%Y') + ' to ' + booking.date_to.strftime('%d/%m/%Y') +')'
-        invoice_item.discount = 0
-        invoice_item.invoice = invoice
-        invoice_item.created_by_id = request.user.id
-        invoice_item.save()
-        invoice = Invoice.objects.get(customer_id=booking.customer.id)
-        invoice_items = InvoiceItem.objects.filter(invoice_id=invoice.id)
-
-    try:
-        invoice_payments = InvoicePayment.objects.filter(invoice=invoice)
-    except InvoicePayment.DoesNotExist:
-        invoice_payments = None
+    invoice_service = InvoiceFactory().build_invoice_service()
+    build_invoice_request = BuildInvoiceRequest(
+        booking_id=request.POST.get('bookingId'),
+        created_by_user_id=request.user.id
+    )
+    build_invoice_response = invoice_service.execute(build_invoice_request=build_invoice_request)
 
     return render(request, 'booking/checkin_dialog.html', {
-        'booking': booking,
-        'invoice': invoice,
-        'invoice_items': invoice_items,
-        'invoice_payments': invoice_payments,
+        'booking': build_invoice_response.booking,
+        'invoice': build_invoice_response.invoice,
+        'invoice_items': build_invoice_response.invoice_items,
+        'invoice_payments': build_invoice_response.invoice_payments,
     })
 
 
