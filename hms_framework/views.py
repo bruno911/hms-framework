@@ -1,12 +1,12 @@
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory, InvoicePaymentFactory
+from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory, InvoicePaymentFactory, \
+    RoomTypeFactory, CountryFactory, CityFactory
 from .forms import BookingForm
-from .models import RoomType, Room, Country, City, Address, Invoice, InvoicePayment
+from .value_object.booking.create_customer_request import CreateCustomerRequest
 from .value_object.financial.build_invoice_request import BuildInvoiceRequest
 
 
@@ -62,15 +62,15 @@ def new_booking(request, room_id=None, date_from=None, date_to=None):
         'room_id': room_id,
         'date_from': date_from,
         'date_to': date_to,
-        'countries': Country.objects.all(),
-        'cities': City.objects.all(),
+        'countries': CountryFactory().create_model().objects.all(),
+        'cities': CityFactory().create_model().objects.all(),
     })
 
 
 @login_required
 def search_availability(request):
 
-    room_types = RoomType.objects.all()
+    room_types = RoomTypeFactory().create_model().objects.all()
 
     if request.method == "POST":
         room_type = request.POST.get("room_type", "")
@@ -165,29 +165,25 @@ def save_customer_json(request):
     if not request.method == 'POST':
         raise Exception('Request type not supported.')
 
-    model = CustomerFactory().create_model()
-    customer = model()
-    customer.first_name = request.POST.get("firstName", "")
-    customer.last_name = request.POST.get("lastName", "")
-    customer.telephone = request.POST.get("telephone", "")
-    customer.email = request.POST.get("email", "")
+    create_customer_request = CreateCustomerRequest(
+        customer_first_name=request.POST.get("firstName", ""),
+        customer_last_name=request.POST.get("lastName", ""),
+        customer_telephone=request.POST.get("telephone", ""),
+        customer_email=request.POST.get("email", ""),
+        address_house_number=request.POST.get("houseNumber", ""),
+        address_street=request.POST.get("street", ""),
+        address_postal_code=request.POST.get("postalcode", ""),
+        address_city_id=request.POST.get("city", ""),
+        address_country_id=request.POST.get("country", ""),
+        created_by_user_id=request.user.id
+    )
+    create_customer_service = CustomerFactory().create_customer_service()
+    create_customer_response = create_customer_service.execute(
+        create_customer_request=create_customer_request
+    )
 
-    address = Address()
-    address.house_number = request.POST.get("houseNumber", "")
-    address.street = request.POST.get("street", "")
-    address.postal_code = request.POST.get("postalcode", "")
-    city_id = request.POST.get("city", "")
-    address.city = City.objects.get(pk=city_id)
-    country_id = request.POST.get("country", "")
-    address.country = Country.objects.get(pk=country_id)
-    address.created_by_id = request.user.id
-    address.save()
-
-    customer.address = address
-    customer.created_by_id = request.user.id
-    customer.save()
-    customer_value = customer.id
-    customer_label = str(customer)
+    customer_value = create_customer_response.customer.id
+    customer_label = str(create_customer_response.customer)
 
     return JsonResponse({
         'customerValue': customer_value,

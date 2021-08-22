@@ -2,9 +2,11 @@ from django.contrib.auth.models import User
 
 from hms_framework.interfaces.patterns.model_factory import ModelFactory
 from hms_framework.interfaces.patterns.service_factory import ServiceFactory
-from hms_framework.models import Customer, Booking, Room, Invoice, InvoiceItem, InvoicePayment
+from hms_framework.models import Customer, Booking, Room, Invoice, InvoiceItem, InvoicePayment, Address, Country, City, \
+    RoomType
 from hms_framework.services.auth.proxy.django_authentication_proxy import DjangoAuthenticationProxy
 from hms_framework.services.auth.authenticator import Authenticator
+from hms_framework.services.booking.create_customer import CreateCustomer
 from hms_framework.services.booking.make_booking import MakeBooking
 from hms_framework.services.booking.search_availability import SearchAvailability
 from hms_framework.services.financial.build_invoice import BuildInvoice
@@ -14,6 +16,16 @@ from hms_framework.services.financial.mark_payment import MarkPayment
 class CustomerFactory(ModelFactory):
     def create_model(self):
         return Customer
+
+    def create_customer_service(self):
+        service = CreateCustomer(
+            customer_model=self.create_model(),
+            address_model=AddressFactory().create_model(),
+            country_model=CountryFactory().create_model(),
+            city_model=CityFactory().create_model()
+        )
+
+        return service
 
 
 class BookingFactory(ModelFactory):
@@ -41,6 +53,26 @@ class BookingFactory(ModelFactory):
 class RoomFactory(ModelFactory):
     def create_model(self):
         return Room
+
+
+class RoomTypeFactory(ModelFactory):
+    def create_model(self):
+        return RoomType
+
+
+class AddressFactory(ModelFactory):
+    def create_model(self):
+        return Address
+
+
+class CountryFactory(ModelFactory):
+    def create_model(self):
+        return Country
+
+
+class CityFactory(ModelFactory):
+    def create_model(self):
+        return City
 
 
 class AuthFactory(ServiceFactory):
