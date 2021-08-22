@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory
+from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory, InvoicePaymentFactory
 from .forms import BookingForm
 from .models import RoomType, Room, Country, City, Address, Invoice, InvoicePayment
 from .value_object.financial.build_invoice_request import BuildInvoiceRequest
@@ -107,7 +107,8 @@ def search_availability(request):
 @login_required
 def checkin(request):
     # Get bookings whose checkin date is today
-    bookings = Booking.objects.all()
+    booking_model = BookingFactory().create_model()
+    bookings = booking_model.objects.all()
     return render(request, 'booking/checkin.html', {'bookings': bookings})
 
 
@@ -138,13 +139,13 @@ def checkin_mark_payment(request):
 
     payment_type = request.POST.get("type", "")
     invoice_id = request.POST.get("invoiceId", "")
-
-    invoice_payment = InvoicePayment()
-    invoice_payment.invoice = Invoice.objects.get(pk=int(invoice_id))
-    invoice_payment.amount = invoice_payment.invoice.invoice_items_total()
-    invoice_payment.payment_type = payment_type
-    invoice_payment.created_by = User.objects.get(pk=request.user.id)
-    invoice_payment.save()
+    user_id = request.user.id
+    mark_payment_service = InvoicePaymentFactory().mark_payment_service()
+    mark_payment_service.execute(
+        invoice_id=invoice_id,
+        payment_type=payment_type,
+        created_by_user_id=user_id
+    )
 
     return JsonResponse({})
 
