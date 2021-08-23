@@ -12,6 +12,8 @@ from django.db import models
 from django_resized import ResizedImageField
 from django.forms import model_to_dict
 
+from hms_framework.interfaces.patterns.visitor import Visitor
+
 
 class Hotel(models.Model):
 
@@ -279,6 +281,10 @@ class Customer(models.Model):
         setattr(self, customer_memento.field_name, customer_memento.field_value)
         super().save()
 
+    def accept(self, visitor: Visitor):
+        customer = self
+        visitor.do_it_for_customer(customer)
+
 
 class Invoice(models.Model):
     customer = models.ForeignKey('Customer', on_delete=models.PROTECT)
@@ -301,6 +307,10 @@ class Invoice(models.Model):
             return 0
 
         return total
+
+    def accept(self, visitor: Visitor):
+        invoice = self
+        visitor.do_it_for_invoice(invoice)
 
 
 class InvoiceItem(models.Model):
