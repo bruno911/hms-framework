@@ -54,55 +54,55 @@
       </div>
       <div class="modal-body">
           <h3>
-              Personal Details:
+              Personal Details: <button class="btn btn-secondary" id="undo_personal_details">Undo Personal Details</button>
           </h3>
 
             <table class="table">
                 <tr>
                     <td>First Name:</td>
                     <td>
-                        <input type="text" id="first_name" class="form-control" />
+                        <input type="text" id="first_name" class="form-control allow-memento-personal-details" />
                     </td>
                     <td>Last Name:</td>
                     <td>
-                        <input type="text" id="last_name" class="form-control" />
+                        <input type="text" id="last_name" class="form-control allow-memento-personal-details" />
                     </td>
                 </tr>
                 <tr>
                     <td>Telephone:</td>
                     <td>
-                        <input type="text" id="telephone" class="form-control" />
+                        <input type="text" id="telephone" class="form-control allow-memento-personal-details" />
                     </td>
                     <td>Email:</td>
                     <td>
-                        <input type="email" id="email" class="form-control" />
+                        <input type="email" id="email" class="form-control allow-memento-personal-details" />
                     </td>
                 </tr>
             </table>
 
           <h3>
-              Address
+              Address <button class="btn btn-secondary" id="undo_address">Undo Address</button>
           </h3>
 
           <table class="table">
             <tr>
                 <td>House Number:</td>
                 <td>
-                    <input type="text" id="house_number" class="form-control" />
+                    <input type="text" id="house_number" class="form-control allow-memento-address" />
                 </td>
                 <td>Street:</td>
                 <td>
-                    <input type="text" id="street" class="form-control" />
+                    <input type="text" id="street" class="form-control allow-memento-address" />
                 </td>
                 <td>Post Code:</td>
                 <td>
-                    <input type="text" id="postal_code" class="form-control" />
+                    <input type="text" id="postal_code" class="form-control allow-memento-address" />
                 </td>
             </tr>
             <tr>
                 <td>Country:</td>
                 <td>
-                    <select id="country" class="form-control">
+                    <select id="country" class="form-control allow-memento-address">
                       {%  for country in countries %}
                         <option value="{{  country.id }}">{{ country }}</option>
                       {% endfor %}
@@ -110,7 +110,7 @@
                 </td>
                 <td>City:</td>
                 <td>
-                    <select id="city" class="form-control">
+                    <select id="city" class="form-control allow-memento-address">
                       {%  for city in cities %}
                         <option value="{{  city.id }}">{{ city }}</option>
                       {% endfor %}
@@ -134,6 +134,27 @@
 
 {% block js %}
 <script>
+    let Memento = function (fieldId, fieldValue) {
+       this.fieldId = fieldId;
+       this.fieldValue = fieldValue;
+    };
+
+    let CareTaker = function () {
+
+        this.mementos = [];
+
+        this.add = function (memento) {
+            this.mementos.push(memento);
+        }
+
+        this.get = function () {
+            return this.mementos.pop();
+        }
+    }
+
+    careTakerPersonalDetails = new CareTaker();
+    careTakerAddress = new CareTaker();
+
     $(document).ready(function (){
         $('#create-customer').click(function (){
            let firstName = $('#first_name').val(),
@@ -172,6 +193,46 @@
                alert('An error occurred');
            })
         });
+
+        $('.allow-memento-personal-details').change(function (){
+            let fieldId = $(this).attr('id'),
+                fieldValue = $(this).val();
+
+            careTakerPersonalDetails.add(new Memento(
+                fieldId,
+                fieldValue
+            ));
+        });
+
+        $('#undo_personal_details').click(function (){
+           let memento = careTakerPersonalDetails.get();
+           setFieldValueFromMemento(memento);
+        });
+
+        $('.allow-memento-address').change(function (){
+            let fieldId = $(this).attr('id'),
+                fieldValue = $(this).val();
+
+            careTakerAddress.add(new Memento(
+                fieldId,
+                fieldValue
+            ));
+        });
+
+        $('#undo_address').click(function (){
+           let memento = careTakerAddress.get();
+           setFieldValueFromMemento(memento);
+        });
+
+
     });
+
+    function setFieldValueFromMemento(memento){
+        if(memento){
+           $('#' + memento.fieldId).val(memento.fieldValue);
+        }else{
+           alert('No history available.')
+        }
+    }
 </script>
 {% endblock %}
