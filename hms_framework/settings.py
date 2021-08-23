@@ -17,6 +17,10 @@ import posixpath
 from django.conf import settings
 from django.conf.urls.static import static
 
+from hms_framework.services.application.composite.logger_composite import LoggerComposite
+from hms_framework.services.application.loggers.log_to_file import LogToFile
+from hms_framework.services.application.loggers.log_to_slack import LogToSlack
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 LOGIN_REDIRECT_URL = "/login"
@@ -139,3 +143,6 @@ DJANGORESIZED_DEFAULT_FORCE_FORMAT = 'JPEG'
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'JPEG': ".jpg"}
 DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 
+logger_composite = LoggerComposite()
+logger_composite.add(LogToSlack())
+logger_composite.add(LogToFile())
