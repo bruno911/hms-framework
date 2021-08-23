@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from hms_framework.factory import CustomerFactory, InvoiceFactory
 from hms_framework.services.exports.export_to_pdf import ExportToPdf
-from hms_framework.settings import logger_composite
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -27,8 +27,8 @@ class Command(BaseCommand):
 
         self.email_files()
 
-        logger_composite.log('INFO', f'Export has successfully exported {len(new_invoices)} invoices'
-                                     f' and {len(new_customers)} customers')
+        settings.logger_composite.log('INFO', f'Export has successfully exported {len(new_invoices)} invoices'
+                                              f' and {len(new_customers)} customers')
 
     @staticmethod
     def email_files():

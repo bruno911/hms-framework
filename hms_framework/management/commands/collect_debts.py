@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from hms_framework.factory import CustomerFactory, FinancialFactory
-from hms_framework.settings import logger_composite
+from django.conf import settings
 
 
 class Command(BaseCommand):
@@ -16,4 +16,4 @@ class Command(BaseCommand):
             debt_collector_service = FinancialFactory().debt_collector_service(customer=customer_with_debts)
             debt_collector_service.collect()
 
-        logger_composite.log('INFO', f'Collect debts has been executed, for {len(customers_with_debts)} customers')
+        settings.logger_composite.log('INFO', f'Collect debts has been executed, for {len(customers_with_debts)} customers')
