@@ -2,4 +2,5 @@ include LICENSE
 include README.rst
 recursive-include hms_framework/static *
 recursive-include hms_framework/templates *
+recursive-include hms_framework/views *
 recursive-include docs *
