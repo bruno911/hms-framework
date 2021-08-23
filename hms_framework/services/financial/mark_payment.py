@@ -1,4 +1,6 @@
 from hms_framework.interfaces.patterns.command import Command
+from hms_framework.services.application.interceptors.measure_loading_time_interceptor import \
+    measure_loading_time_interceptor
 
 
 class MarkPayment(Command):
@@ -8,6 +10,7 @@ class MarkPayment(Command):
         self.user_model = user_model
         self.invoice_payment_model = invoice_payment_model
 
+    @measure_loading_time_interceptor
     def execute(self, invoice_id, payment_type, created_by_user_id):
         invoice_payment = self.invoice_payment_model()
         invoice_payment.invoice = self.invoice_model.objects.get(pk=int(invoice_id))

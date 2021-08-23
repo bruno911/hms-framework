@@ -1,6 +1,8 @@
 import datetime
 
 from hms_framework.interfaces.patterns.command import Command
+from hms_framework.services.application.interceptors.measure_loading_time_interceptor import \
+    measure_loading_time_interceptor
 from hms_framework.value_object.financial.build_invoice_request import BuildInvoiceRequest
 from hms_framework.value_object.financial.build_invoice_response import BuildInvoiceResponse
 
@@ -14,6 +16,7 @@ class BuildInvoice(Command):
         self.user_model = user_model
         self.invoice_payment_model = invoice_payment_model
 
+    @measure_loading_time_interceptor
     def execute(self, build_invoice_request: BuildInvoiceRequest):
         booking = self.booking_model.objects.get(pk=build_invoice_request.booking_id)
 
