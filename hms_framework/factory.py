@@ -131,7 +131,8 @@ class InvoicePaymentFactory(ModelFactory):
 
 
 class FinancialFactory:
-    def debt_collector_service(self, customer):
+    @staticmethod
+    def debt_collector_service(customer):
         service = DebtCollector(customer=customer)
         return service
 

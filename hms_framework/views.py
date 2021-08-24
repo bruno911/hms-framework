@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 
 from .factory import BookingFactory, CustomerFactory, AuthFactory, InvoiceFactory, InvoicePaymentFactory, \
-    RoomTypeFactory, CountryFactory, CityFactory
+    RoomTypeFactory, CountryFactory, CityFactory, RoomFactory, ChartFactory
 from .forms import BookingForm
 from .value_object.booking.create_customer_request import CreateCustomerRequest
 from .value_object.financial.build_invoice_request import BuildInvoiceRequest
@@ -48,7 +48,7 @@ def new_booking(request, room_id=None, date_from=None, date_to=None):
         return render(request, 'dashboard/index.html')
 
     if room_id and date_from and date_to:
-        data = {'room': Room.objects.get(pk=room_id),
+        data = {'room': RoomFactory().create_model().objects.get(pk=room_id),
                 'room_id': room_id,
                 'date_from': date_from,
                 'date_to': date_to}
