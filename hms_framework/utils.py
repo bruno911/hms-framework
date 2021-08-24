@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class TimeDiff:
@@ -26,3 +26,8 @@ class TimeDiff:
 
     def print_step(self):
         print(self.step)
+
+
+def date_range(start_date, end_date):
+    for n in range(0, int((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)

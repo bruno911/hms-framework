@@ -3,7 +3,14 @@
 {% block content %}
     <h2>Occupancy report</h2>
 
+    <div>
+        <h3>Guest Daily Chart</h3>
+        <img src="data:image/png;base64, {{ guests_daily_chart_base64 }}" alt="Guests Daily Chart" />
+    </div>
 
-
+    <div>
+        <h3>Empty Rooms Chart</h3>
+        <img src="data:image/png;base64, {{ empty_rooms_chart_base64 }}" alt="Empty Rooms Chart" />
+    </div>
 
 {% endblock %}
