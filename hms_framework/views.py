@@ -157,7 +157,14 @@ def checkout(request):
 
 @login_required
 def occupancy_report(request):
-    return render(request, 'report/occupancy_report.html', {})
+
+    empty_rooms_chart_base64 = ChartFactory().empty_rooms_daily().base64_image()
+    guests_daily_chart_base64 = ChartFactory().guests_daily().base64_image()
+
+    return render(request, 'report/occupancy_report.html', {
+        'empty_rooms_chart_base64': empty_rooms_chart_base64,
+        'guests_daily_chart_base64': guests_daily_chart_base64
+    })
 
 
 @login_required

@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 
 from hms_framework.interfaces.patterns.model_factory import ModelFactory
 from hms_framework.interfaces.patterns.service_factory import ServiceFactory
+from hms_framework.interfaces.ui.chart import Chart
 from hms_framework.models import Customer, Booking, Room, Invoice, InvoiceItem, InvoicePayment, Address, Country, City, \
     RoomType
 from hms_framework.services.auth.proxy.django_authentication_proxy import DjangoAuthenticationProxy
@@ -12,6 +13,10 @@ from hms_framework.services.booking.search_availability import SearchAvailabilit
 from hms_framework.services.financial.build_invoice import BuildInvoice
 from hms_framework.services.financial.debt_collector import DebtCollector
 from hms_framework.services.financial.mark_payment import MarkPayment
+from hms_framework.services.ui.bar_horizontal import BarHorizontal
+from hms_framework.services.ui.bar_vertical import BarVertical
+from hms_framework.services.ui.empty_rooms_daily import EmptyRoomsDaily
+from hms_framework.services.ui.guests_daily import GuestsDaily
 
 
 class CustomerFactory(ModelFactory):
@@ -134,3 +139,17 @@ class FinancialFactory:
 class UserFactory(ModelFactory):
     def create_model(self):
         return User
+
+
+class ChartFactory:
+    @staticmethod
+    def empty_rooms_daily() -> Chart:
+        return BarHorizontal(countable_date_resources=EmptyRoomsDaily(
+            room_model=RoomFactory().create_model()
+        ))
+
+    @staticmethod
+    def guests_daily() -> Chart:
+        return BarVertical(countable_date_resources=GuestsDaily(
+            customer_model=CustomerFactory().create_model()
+        ))
