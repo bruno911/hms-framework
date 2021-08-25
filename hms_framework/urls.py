@@ -13,10 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
+
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.urls import include, path
+from rest_framework.documentation import include_docs_urls
 
 from hms_framework import views, settings
 
@@ -34,7 +37,12 @@ urlpatterns = [
     url(r'^report/occupancy_report', views.occupancy_report, name='occupancy_report'),
     url(r'^api/customer/create', views.save_customer_json, name='save_customer_json'),
     url(r'^logout', auth_views.LogoutView, name='logout'),
-    url('accounts/login/', auth_views.LoginView, name='login'),
+
+    url(f'^accounts/login/', auth_views.LoginView, name='login'),
+
+    # API
+    path("api/v1/", include("hms_framework.api.urls")),
+    url(r'^api/docs/', include_docs_urls(title='hms_framework')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

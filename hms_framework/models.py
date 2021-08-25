@@ -31,10 +31,6 @@ class Hotel(models.Model):
     )
     created_datetime = models.DateTimeField(auto_now_add=True)
 
-    def get_list_of_available_rooms(self):
-        # TODO:
-        pass
-
 
 # Address - Model:
 # house_number: string
