@@ -46,7 +46,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django_filters',
+    'rest_framework',
+    'rest_framework.authtoken',
+
     'hms_framework',
+
+
 ]
 
 MIDDLEWARE = [
@@ -146,3 +153,30 @@ DJANGORESIZED_DEFAULT_NORMALIZE_ROTATION = True
 logger_composite = LoggerComposite()
 logger_composite.add(LogToSlack())
 logger_composite.add(LogToFile())
+
+REST_FRAMEWORK = {
+    # AUTHENTICATIONS
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    # PERMISSIONS
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # PAGINATION
+    'DEFAULT_PAGINATION_CLASS': 'hms_framework.api.paginations.HugePagination',
+    # FILTERING
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    # DOCS
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/day',
+        'user': '100/day'
+    }
+}
