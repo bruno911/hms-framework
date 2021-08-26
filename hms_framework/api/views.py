@@ -7,8 +7,9 @@ from rest_framework import viewsets, mixins, status
 
 from hms_framework.api import permissions as custom_permissions, paginations
 from . import serializers
+from .serializers import RoomSerializer
 from .. import models
-from ..factory import BookingFactory
+from ..factory import BookingFactory, RoomTypeFactory, RoomFactory
 
 
 class HotelViewSet(viewsets.ModelViewSet):
@@ -22,7 +23,7 @@ class HotelViewSet(viewsets.ModelViewSet):
 
 
 class AddressViewSet(viewsets.ModelViewSet):
-    queryset = models.Hotel.objects.all()
+    queryset = models.Address.objects.all()
     serializer_class = serializers.AddressSerializer
     permission_classes = [custom_permissions.IsSuperUserOrManagementReadOnly]
     pagination_class = paginations.SmallPagination
@@ -133,7 +134,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
 
 class InvoiceItemViewSet(viewsets.ModelViewSet):
-    queryset = models.Invoice.objects.all()
+    queryset = models.InvoiceItem.objects.all()
     serializer_class = serializers.InvoiceItemSerializer
     permission_classes = [custom_permissions.IsSuperUserOrManagementReadOnly]
     pagination_class = paginations.SmallPagination
@@ -156,14 +157,15 @@ class BookingViewSet(viewsets.ModelViewSet):
 
         make_booking_service = BookingFactory().make_booking_service()
         booking = make_booking_service.execute(
-            room_id=request.data.room.id,
-            customer_id=request.data.customer.id,
+            room_id=request.data['room'],
+            customer_id=request.data['customer'],
             date_from=request.data['date_from'],
             date_to=request.data['date_to'],
-            created_by_user_id=request.user
+            created_by_user_id=request.user.id
         )
 
-        return Response(booking.__dict__, status=status.HTTP_201_CREATED)
+        serializer = self.get_serializer(booking)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class SearchAvailabilityViewSet(mixins.CreateModelMixin, viewsets.ViewSetMixin, GenericAPIView):
@@ -175,13 +177,17 @@ class SearchAvailabilityViewSet(mixins.CreateModelMixin, viewsets.ViewSetMixin, 
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        make_booking_service = BookingFactory().make_booking_service()
-        booking = make_booking_service.execute(
-            room_id=request.data.room.id,
-            customer_id=request.data['customer_id'],
+        search_availability_service = BookingFactory().search_availability_service()
+        
+        room_model = RoomFactory().create_model()
+        room_type_model = RoomTypeFactory().create_model()
+        room_type = room_type_model.objects.get(pk=request.data['room_type'])
+        rooms = search_availability_service.execute(
+            room_type=room_type,
+            number_of_guests=request.data['number_of_guests'],
             date_from=request.data['date_from'],
-            date_to=request.data['date_to'],
-            created_by_user_id=request.user
+            date_to=request.data['date_to']
         )
 
-        return Response(data=booking.__dict__, status=status.HTTP_200_OK)
+        serializer = RoomSerializer(room_model.objects.all().first())
+        return Response(serializer.data, status=status.HTTP_200_OK)

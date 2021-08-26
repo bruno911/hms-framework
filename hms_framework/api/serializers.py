@@ -87,7 +87,8 @@ class BookingSerializer(serializers.ModelSerializer):
 
 
 class SearchAvailabilitySerializer(serializers.Serializer):
-    customer_id = serializers.IntegerField()
+    room_type = serializers.IntegerField()
+    number_of_guests = serializers.IntegerField()
     date_from = serializers.DateField()
     date_to = serializers.DateField()
 
