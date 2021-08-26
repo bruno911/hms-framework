@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .. import models
+from ..factory import RoomFactory
 
 
 class HotelSerializer(serializers.ModelSerializer):
@@ -28,7 +29,7 @@ class CitySerializer(serializers.ModelSerializer):
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
-        model = models.Room
+        model = RoomFactory().create_model()
         fields = '__all__'
 
 
