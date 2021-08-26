@@ -42,10 +42,12 @@ class BookingFactory(ModelFactory):
         booking_model = self.create_model()
         room_model = RoomFactory().create_model()
         customer_model = CustomerFactory().create_model()
+        user_model = UserFactory().create_model()
         service = MakeBooking(
             booking_model=booking_model,
             room_model=room_model,
-            customer_model=customer_model
+            customer_model=customer_model,
+            user_model=user_model
         )
         return service
 
