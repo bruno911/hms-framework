@@ -18,6 +18,10 @@ from hms_framework.services.ui.bar_vertical import BarVertical
 from hms_framework.services.ui.empty_rooms_daily import EmptyRoomsDaily
 from hms_framework.services.ui.guests_daily import GuestsDaily
 
+from django.conf import settings
+
+from hms_framework.utils import class_for_name
+
 
 class CustomerFactory(ModelFactory):
     def create_model(self):
@@ -43,6 +47,16 @@ class BookingFactory(ModelFactory):
         room_model = RoomFactory().create_model()
         customer_model = CustomerFactory().create_model()
         user_model = UserFactory().create_model()
+
+        if settings.MAKE_BOOKING_SERVICE_MODULE and settings.MAKE_BOOKING_SERVICE_CLASS_NAME:
+            return class_for_name(
+                settings.MAKE_BOOKING_SERVICE_MODULE,
+                settings.MAKE_BOOKING_SERVICE_CLASS_NAME)(
+                booking_model=booking_model,
+                room_model=room_model,
+                customer_model=customer_model,
+                user_model=user_model
+            )
         service = MakeBooking(
             booking_model=booking_model,
             room_model=room_model,

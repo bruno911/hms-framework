@@ -1,3 +1,4 @@
+import importlib
 from datetime import datetime, timedelta
 
 
@@ -31,3 +32,9 @@ class TimeDiff:
 def date_range(start_date, end_date):
     for n in range(0, int((end_date - start_date).days) + 1):
         yield start_date + timedelta(n)
+
+
+def class_for_name(module_name, class_name):
+    m = importlib.import_module(module_name)
+    c = getattr(m, class_name)
+    return c
