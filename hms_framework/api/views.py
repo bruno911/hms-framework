@@ -53,7 +53,7 @@ class CityViewSet(viewsets.ModelViewSet):
 
 
 class RoomViewSet(viewsets.ModelViewSet):
-    queryset = models.Room.objects.all()
+    queryset = RoomFactory().create_model().objects.all()
     serializer_class = serializers.RoomSerializer
     permission_classes = [custom_permissions.IsSuperUserOrManagementReadOnly]
     pagination_class = paginations.SmallPagination
