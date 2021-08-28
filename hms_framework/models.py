@@ -254,6 +254,7 @@ class Customer(models.Model):
                               self._meta.fields])
         return _dict
 
+    # Customer (ORM)
     def save_memento(self):
         if self.has_changed:
             for field_name in self.changed_fields:
@@ -277,6 +278,7 @@ class Customer(models.Model):
         setattr(self, customer_memento.field_name, customer_memento.field_value)
         super().save()
 
+    # Customer
     def accept(self, visitor: Visitor):
         customer = self
         visitor.do_it_for_customer(customer)
